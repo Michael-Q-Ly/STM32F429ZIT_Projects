@@ -15,7 +15,7 @@
 
 /* Function Prototype(s) */
 extern void initialise_monitor_handles(void) ;								// Semihosting Debugger
-void initLED(void) ;
+void initLED(void) ;											// Sets internal registers
 
 /* Constants */
 // Memory Addresses
@@ -23,29 +23,29 @@ uint32_t const	ADDR_RCC	= 0x40023800 + 0x30 ;							// Address of the RCC periph
 uint32_t const	ADDR_MODE	= 0x40021800 + 0x00;							// Address of GPIOG pin 13 (Green_LED)
 uint32_t const	ADDR_OUT	= 0x40021800 + 0x14 ;							// Address of GPIOG output data register
 // Timing
-uint32_t const	DELAY		= 300000 ;										// Delay to set the bit on or off
+uint32_t const	DELAY		= 300000 ;								// Delay to set the bit on or off
 
 // 0.) Assign addresses to pointers
-RCC_AHB1ENR_t volatile *const	pClkCtrlReg		= (RCC_AHB1ENR_t*)	ADDR_RCC ;
+RCC_AHB1ENR_t volatile *const	pClkCtrlReg	= (RCC_AHB1ENR_t*)	ADDR_RCC ;
 GPIOx_MODER_t volatile *const	pPortGModeReg	= (GPIOx_MODER_t*)	ADDR_MODE ;
 GPIOx_ODR_t   volatile *const	pPortGOutReg	= (GPIOx_ODR_t*) 	ADDR_OUT ;
 
 int main(void)
 {
-	initialise_monitor_handles();											// Semihosting Debugger	
+	initialise_monitor_handles();									// Semihosting Debugger	
 
 	initLED() ;
 
 	/* Loop forever */
 	while (1) {
 		for (uint32_t count = 0; count < DELAY; count++) ;					// NOP several times for a delay
-		pPortGOutReg -> pin_13 ^= 1 ;										// Dereference struct pointer and xor w/ 1 to toggle
+		pPortGOutReg -> pin_13 ^= 1 ;								// Dereference struct pointer and xor w/ 1 to toggle
 	}
 }
 
-void initLED(void) {
-	// 1.) Enable the clock for GPIOG peripheral in the AHB1ENR
-	pClkCtrlReg	-> gpiog_en = SET_CLOCK ;
+void initLED(void) {											// This function sets the internal registers
+	// 1.) Enable the clock for GPIOG peripheral in the AHB1ENR					// Such as peripheral clock, GPIO, and GPIO
+	pClkCtrlReg	-> gpiog_en = SET_CLOCK ;							// port modes.
 
 	// 2.) Configure the mode of the IO pin as output (01)
 	pPortGModeReg -> pin_13 = SET_MODE ;
